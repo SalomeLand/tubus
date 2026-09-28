@@ -16,7 +16,7 @@ const obtenerTrazados = async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ success: false, message: 'Error al obtener los trazados' });
+        res.status(500).json({ success: false, message: 'Error al obtener los trazados', E: err.message });
     }
 };
 

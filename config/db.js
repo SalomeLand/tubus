@@ -1,5 +1,7 @@
-const sql = require('mssql');
+
 require('dotenv').config();
+
+const sql = require('mssql');
 
 const dbConfig = {
     user: process.env.DB_USER,
@@ -13,17 +15,19 @@ const dbConfig = {
     }
 };
 
-
-const connectDB = async () => {
-    try {
-        await sql.connect(dbConfig);
-        console.log('Conectado exitosamente a SQL Server');
-    } catch (error) {
-        console.error('Error de conexión a SQL Server:', error);
-    }
-};
+// Crear la conexión y ASEGURARSE de retornar el pool
+const poolPromise = new sql.ConnectionPool(dbConfig)
+    .connect()
+    .then(pool => {
+        console.log('Conectado a SQL Server exitosamente');
+        return pool; // <--- ESTA ES LA LÍNEA CLAVE QUE TE FALTA
+    })
+    .catch(err => {
+        console.error('Error al conectar a la base de datos:', err);
+        throw err;
+    });
 
 module.exports = {
     sql,
-    connectDB
+    poolPromise
 };

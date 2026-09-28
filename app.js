@@ -5,7 +5,9 @@ require('dotenv').config();
 const app = express();
 
 // 1. Middlewares globales
-app.use(cors());
+app.use(cors({
+  origin: '*' // O especifica la IP/puerto exacto de tu frontend, ej: 'http://192.168.43.X:5173'
+}));
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -20,7 +22,8 @@ app.use('/api/rutas', rutasRoutes);
 app.use('/', vistasRoutes);
 
 // 4. Levantar el servidor
+// ✅ BIEN: Escucha peticiones de la red local (Wi-Fi / Punto de acceso)
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor de TuBus corriendo en el puerto ${PORT}`);
 });

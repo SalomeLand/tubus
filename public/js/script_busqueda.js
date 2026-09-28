@@ -1,27 +1,33 @@
-// Función para mostrar una sola ruta y ocultar las demás
-window.resaltarRutaEnMapa = function(idRuta) {
-    // Si no hay mapa o capas, salir
+window.resaltarRutaEnMapa = function(idsSeleccionadas) {
     if (!map || Object.keys(capasRutas).length === 0) return;
 
-    // Quitar todas las rutas del mapa
+    // 1. Quitar siempre todas las rutas del mapa para limpiar
     Object.values(capasRutas).forEach(capa => {
         map.removeLayer(capa);
     });
 
-    // Si se pasa 'todas' o null, volver a mostrar el mapa completo
-    if (idRuta === 'todas' || !idRuta) {
-        Object.values(capasRutas).forEach(capa => {
-            capa.addTo(map);
-        });
+    // 2. Si el arreglo está vacío, centrar la cámara en la ciudad sin mostrar rutas
+    if (!idsSeleccionadas || idsSeleccionadas.length === 0) {
         map.setView([24.8088, -107.3942], 13);
         return;
     }
 
-    // Si la ruta existe, agregarla y centrar la cámara en ella
-    const capaSeleccionada = capasRutas[idRuta];
-    if (capaSeleccionada) {
-        capaSeleccionada.addTo(map);
-        map.fitBounds(capaSeleccionada.getBounds());
-        capaSeleccionada.openPopup();
+    // 3. Crear una caja de límites (bounds) para centrar la cámara en las seleccionadas
+    let bounds = L.latLngBounds();
+    let hayRutasVisibles = false;
+
+    // 4. Agregar al mapa únicamente las rutas seleccionadas
+    idsSeleccionadas.forEach(id => {
+        const capaSeleccionada = capasRutas[id];
+        if (capaSeleccionada) {
+            capaSeleccionada.addTo(map);
+            bounds.extend(capaSeleccionada.getBounds());
+            hayRutasVisibles = true;
+        }
+    });
+
+    // 5. Ajustar el zoom para que se vean todas las seleccionadas
+    if (hayRutasVisibles) {
+        map.fitBounds(bounds);
     }
 };

@@ -3,7 +3,7 @@ let datosRutas = [];
 
 async function cargarDatosIniciales() {
     try {
-        const response = await fetch('http://localhost:3001/api/rutas/trazados');
+        const response = await fetch('/api/rutas/trazados');    
         const result = await response.json();
         
         if (result.success) {

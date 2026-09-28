@@ -1,3 +1,4 @@
+
 let map;
 let capasRutas = {}; // Diccionario para guardar las polilíneas por id_ruta
 
@@ -35,7 +36,7 @@ function dibujarRutas(rutas) {
             });
 
             polyline.bindPopup(`<b>${ruta.nombre}</b>`);
-            polyline.addTo(map);
+            //polyline.addTo(map);
             
             // Guardar la referencia de la línea usando su ID
             capasRutas[ruta.id_ruta] = polyline;

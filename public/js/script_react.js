@@ -3,8 +3,9 @@ const e = React.createElement;
 function CatalogoRutas() {
     const [rutas, setRutas] = React.useState([]);
     const [busqueda, setBusqueda] = React.useState('');
-    const [idSeleccionada, setIdSeleccionada] = React.useState(null);
-    const [desplegado, setDesplegado] = React.useState(true); // Estado para abrir/cerrar panel en móvil
+    // Cambio: ahora usamos un arreglo para guardar múltiples rutas
+    const [idsSeleccionadas, setIdsSeleccionadas] = React.useState([]); 
+    const [desplegado, setDesplegado] = React.useState(true); 
 
     React.useEffect(() => {
         const manejarRutasCargadas = (evento) => setRutas(evento.detail);
@@ -17,14 +18,27 @@ function CatalogoRutas() {
         return () => window.removeEventListener('rutasCargadas', manejarRutasCargadas);
     }, []);
 
-    const seleccionarRuta = (id) => {
-        setIdSeleccionada(id);
-        if (typeof window.resaltarRutaEnMapa === 'function') {
-            window.resaltarRutaEnMapa(id);
+    // Nueva función para seleccionar/deseleccionar múltiples
+    const toggleRuta = (id) => {
+        let nuevasSeleccionadas;
+        
+        if (id === 'todas') {
+            // Si ya están todas, deseleccionamos; si no, seleccionamos todas
+            nuevasSeleccionadas = idsSeleccionadas.length === rutas.length ? [] : rutas.map(r => r.id_ruta);
+        } else {
+            // Agregar o quitar la ruta del arreglo
+            if (idsSeleccionadas.includes(id)) {
+                nuevasSeleccionadas = idsSeleccionadas.filter(rutaId => rutaId !== id);
+            } else {
+                nuevasSeleccionadas = [...idsSeleccionadas, id];
+            }
         }
-        // En móviles, cerramos levemente el panel para ver la ruta seleccionada
-        if (window.innerWidth <= 768) {
-            setDesplegado(false);
+        
+        setIdsSeleccionadas(nuevasSeleccionadas);
+        
+        // Enviar el arreglo al mapa
+        if (typeof window.resaltarRutaEnMapa === 'function') {
+            window.resaltarRutaEnMapa(nuevasSeleccionadas);
         }
     };
 
@@ -33,91 +47,61 @@ function CatalogoRutas() {
     );
 
     return e('div', { 
-        style: { 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '10px',
-            height: '100%' 
-        } 
+        style: { display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' } 
     }, [
-        // Barra superior del panel con botón para ocultar/mostrar en móviles
         e('div', { 
             key: 'header-panel', 
             onClick: () => setDesplegado(!desplegado),
-            style: { 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                cursor: 'pointer',
-                userSelect: 'none'
-            } 
+            style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', userSelect: 'none' } 
         }, [
             e('h2', { key: 'titulo', style: { fontSize: '1.1rem', color: '#1a1a1a' } }, 'Rutas de Culiacán'),
-            e('span', { 
-                key: 'indicador-movil', 
-                style: { fontSize: '0.85rem', color: '#0056b3', fontWeight: 'bold' } 
-            }, desplegado ? '▼ Ocultar' : '▲ Ver rutas')
+            e('span', { key: 'indicador-movil', style: { fontSize: '0.85rem', color: '#0056b3', fontWeight: 'bold' } }, desplegado ? '▼ Ocultar' : '▲ Ver rutas')
         ]),
 
-        // Contenido del panel (se oculta en móvil si desplegado === false)
-        desplegado && e('React.Fragment', { key: 'contenido-panel' }, [
+        desplegado && e(React.Fragment, { key: 'contenido-panel' }, [
             e('input', {
                 key: 'input-busqueda',
                 type: 'text',
                 placeholder: '🔍 Buscar ruta o colonia...',
                 value: busqueda,
                 onChange: (evt) => setBusqueda(evt.target.value),
-                style: {
-                    padding: '12px',
-                    borderRadius: '8px',
-                    border: '1px solid #ccc',
-                    width: '100%',
-                    fontSize: '16px' // Previene zoom automático en iOS Safari
-                }
+                style: { padding: '12px', borderRadius: '8px', border: '1px solid #ccc', width: '100%', fontSize: '16px' }
             }),
 
             e('button', {
                 key: 'btn-todas',
-                onClick: () => seleccionarRuta('todas'),
+                onClick: () => toggleRuta('todas'),
                 style: {
                     padding: '10px',
-                    backgroundColor: idSeleccionada === 'todas' ? '#003d80' : '#0056b3',
+                    // Cambia color si todas están seleccionadas
+                    backgroundColor: idsSeleccionadas.length === rutas.length && rutas.length > 0 ? '#003d80' : '#0056b3',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
                     fontWeight: 'bold',
                     cursor: 'pointer',
-                    minHeight: '44px' // Botón optimizado para tamaño táctil estándar
+                    minHeight: '44px' 
                 }
-            }, 'Ver todas en el mapa'),
+            }, idsSeleccionadas.length === rutas.length && rutas.length > 0 ? 'Deseleccionar todas' : 'Ver todas en el mapa'),
 
-            e('div', {
-                key: 'lista',
-                style: {
-                    overflowY: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    maxHeight: '30vh'
-                }
-            },
+            e('div', { key: 'lista', style: { overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '30vh' } },
                 rutasFiltradas.length > 0
                     ? rutasFiltradas.map(ruta => 
                         e('div', {
                             key: ruta.id_ruta,
-                            onClick: () => seleccionarRuta(ruta.id_ruta),
+                            onClick: () => toggleRuta(ruta.id_ruta),
                             style: {
                                 padding: '12px',
                                 border: '1px solid #e0e0e0',
                                 borderRadius: '8px',
                                 cursor: 'pointer',
-                                backgroundColor: idSeleccionada === ruta.id_ruta ? '#e6f2ff' : '#ffffff',
-                                borderColor: idSeleccionada === ruta.id_ruta ? '#0056b3' : '#e0e0e0',
-                                activeStyle: { backgroundColor: '#d0e4ff' }
+                                // Evalúa si la ruta está en el arreglo de seleccionadas
+                                backgroundColor: idsSeleccionadas.includes(ruta.id_ruta) ? '#e6f2ff' : '#ffffff',
+                                borderColor: idsSeleccionadas.includes(ruta.id_ruta) ? '#0056b3' : '#e0e0e0'
                             }
                         }, [
                             e('strong', { key: 'nombre', style: { display: 'block', color: '#222', fontSize: '0.95rem' } }, ruta.nombre),
-                            e('span', { key: 'sub', style: { fontSize: '0.8rem', color: '#666' } }, 'Tocar para enfocar mapa')
+                            e('span', { key: 'sub', style: { fontSize: '0.8rem', color: '#666' } }, 'Tocar para mostrar/ocultar')
                         ])
                     )
                     : e('p', { key: 'no-datos', style: { color: '#888', fontSize: '0.9rem', textAlign: 'center', padding: '10px' } }, 'No se encontraron rutas.')
