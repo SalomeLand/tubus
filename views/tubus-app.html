@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>TuBus - Planificador de Rutas</title>
+    
+    <!-- CSS de Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Tu CSS personalizado -->
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Barra de navegación / Encabezado -->
+    <header>
+        <h1>TuBus - Culiacán</h1>
+        <!-- El nombre del usuario lo llenaremos luego con JS -->
+        <p id="info-usuario">Cargando usuario...</p> 
+    </header>
+
+    <main style="display: flex; gap: 20px; padding: 20px;">
+        <!-- Contenedor para el catálogo de React -->
+        <aside id="react-root" style="width: 300px;">
+            <!-- React renderizará el catálogo aquí -->
+        </aside>
+
+        <!-- Contenedor para el Mapa de Leaflet -->
+        <section id="mapa" style="flex-grow: 1; height: 600px; background: #eee;">
+            <!-- Leaflet renderizará el mapa aquí -->
+        </section>
+    </main>
+
+    <!-- 1. Librerías Externas -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+    <!-- 2. Tus Scripts Locales (Ordenados por dependencia) -->
+    <script src="/js/script.js"></script>
+    <script src="/js/script_mapa.js"></script>
+    <script src="/js/script_busqueda.js"></script>
+    <script src="/js/script_react.js"></script>
+</body>
+</html>
